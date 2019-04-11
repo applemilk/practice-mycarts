@@ -7,7 +7,8 @@
         <div class="filter-nav">
           <span class="sortby">Sort by:</span>
           <a href="javascript:void(0)" class="default cur">Default</a>
-          <a @click="sortGoods" href="javascript:void(0)" class="price">Price <svg class="icon icon-arrow-short"><use xlink:href="#icon-arrow-short"></use></svg></a>
+          <a @click="sortGoods" href="javascript:void(0)" class="price">Price
+            <svg class="icon icon-arrow-short" v-bind:class="{'sort-up':!sortFlag}"><use xlink:href="#icon-arrow-short"></use></svg></a>
           <a href="javascript:void(0)" class="filterby stopPop" @click="showFilterPop">Filter by</a>
         </div>
         <div class="accessory-result">
@@ -15,13 +16,12 @@
           <div class="filter stopPop" id="filter" v-bind:class="{'filterby-show':filterBy}">
             <dl class="filter-price">
               <dt>Price:</dt>
-              <dd><a href="javascript:void(0)" v-bind:class="{'cur':priceChecked==all}" @click="priceChecked=all">All</a></dd>
+              <dd><a href="javascript:void(0)" v-bind:class="{'cur':priceChecked==='all'}" @click="priceChecked='all'">All</a></dd>
               <dd v-for="(price,index) in priceFilter" :key="index">
-                <a href="javascript:void(0)" @click="setPriceFilter(index)" v-bind:class="{'cur':priceChecked==index}">{{price.startPrice}} - {{price.endPrice}}</a>
+                <a href="javascript:void(0)" @click="setPriceFilter(index)" v-bind:class="{'cur':priceChecked===index}">{{price.startPrice}} - {{price.endPrice}}</a>
               </dd>
             </dl>
           </div>
-
           <!-- search result accessories list -->
           <div class="accessory-list-wrap">
             <div class="accessory-list col-4">
@@ -48,20 +48,50 @@
       </div>
     </div>
     <div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
+    <modal v-bind:mdShow="mdShow" v-on:close="closeModal">
+      <p slot="message">
+        请先登录，否则无法加入到购物车中！
+      </p>
+      <div slot="btnGroup">
+        <a class="btn btn--m" href="javascript:;" @click="mdShow=false">关闭</a>
+      </div>
+    </modal>
+    <modal v-bind:mdShow="mdShowCart" v-on:close="closeModal">
+      <p slot="message">
+        <svg class="navbar-cart-logo">
+          <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-status"></use>
+        </svg>
+        <span>加入购物车成功！</span>
+      </p>
+      <div slot="btnGroup">
+        <a class="btn btn--m" href="javascript:;" @click="mdShowCart=false">继续</a>
+        <router-link class="btn btn--m" href="javascript:;" to="/cart">查看购物车</router-link>
+      </div>
+    </modal>
     <nav-footer></nav-footer>
   </div>
 </template>
-
+<style>
+  .sort-up{
+    transform: rotate(180deg);
+    transition: all .3s ease-out;
+  }
+  .btn:hover{
+    background-color: #ffe5e6;
+    transition: all .3s ease-out;
+  }
+</style>
 <script>
 import './../assets/css/base.css'
 import './../assets/css/product.css'
 import './../assets/css/login.css'
+import Modal from '../components/Modal'
 import NavHeader from '../components/NavHeader'
 import NavFooter from '../components/NavFooter'
 import NavBread from '../components/NavBread'
 import axios from 'axios'
 export default {
-  components: {NavBread, NavFooter, NavHeader},
+  components: {NavBread, NavFooter, NavHeader, Modal},
   data () {
     return {
       goodsList: [],
@@ -71,6 +101,8 @@ export default {
       busy: true,
       priceLevel: 'all',
       loading: false,
+      mdShow: false,
+      mdShowCart: false,
       priceFilter: [
         {
           startPrice: '0.00',
@@ -106,10 +138,11 @@ export default {
         priceLevel: this.priceChecked
       }
       this.loading = true
-      axios.get('goods', {
+      axios.get('/goods/list', {
         params: param
       }).then((res) => {
         this.loading = false
+        // console.log(res.data.result)
         if (flag) {
           this.goodsList = this.goodsList.concat(res.data.result.list)
           if (res.result.count === 0) {
@@ -126,7 +159,7 @@ export default {
     sortGoods () {
       this.sortFlag = !this.sortFlag
       this.page = 1
-      this.goodsList()
+      this.getGoodsList()
     },
     showFilterPop () {
       this.filterBy = true
@@ -153,12 +186,15 @@ export default {
       axios.post('goods/addCart', {
         productId: productId
       }).then((res) => {
-        if (res.status === 200) {
-          alert('加入成功')
+        if (res.data.status === '0') {
+          this.mdShowCart = true
         } else {
-          alert('msg:' + res.status)
+          this.mdShow = true
         }
       })
+    },
+    closeModal () {
+      this.mdShow = false
     }
   }
 }

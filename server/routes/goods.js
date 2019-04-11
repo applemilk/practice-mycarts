@@ -52,19 +52,18 @@ router.post('/addCart', function (req, res, next) {
             }
           })
         } else {
-          Goods.findOne({productId: productId}, function (err, productDoc) {
-            if (err) {
+          Goods.findOne({productId: productId}, function (err1, productDoc) {
+            if (err1) {
               res.json({
                 status: '1',
-                msg: err.message
+                msg: err1.message
               })
             } else {
               if (productDoc) {
+                productDoc = productDoc.toObject()
                 productDoc.productNum = 1
                 productDoc.checked = 1
-                console.log('doc:' + productDoc)
                 userDoc.cartList.push(productDoc)
-                console.log('userDoc:' + userDoc)
                 userDoc.save(function (err2, doc2) {
                   if (err2) {
                     res.json({
@@ -88,7 +87,7 @@ router.post('/addCart', function (req, res, next) {
   })
 })
 
-router.get('/', function (req, res, next) {
+router.get('/list', function (req, res, next) {
   let page = parseInt(req.param('page'))
   let pageSize = parseInt(req.param('pageSize'))
   let sort = req.param('sort')

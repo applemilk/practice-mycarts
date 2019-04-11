@@ -11,10 +11,10 @@ var userSchema = new Schema({
     'productName': String,
     'salePrice': Number,
     'productImg': String,
-    'checked': String,
-    'product': String
+    'checked': Boolean,
+    'productNum': Number
   }],
   'addressList': Array
 })
 
-module.exports = mongoose.model('user', userSchema)
+module.exports = mongoose.model('User', userSchema)

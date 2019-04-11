@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # shopping
 
 > A Vue.js project
@@ -28,3 +29,6 @@ npm test
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+=======
+# practice-mycarts
+>>>>>>> 64ca784be9129fee8f1ba0547e3aee337a764640
